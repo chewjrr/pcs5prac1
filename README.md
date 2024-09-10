@@ -1,5 +1,5 @@
 ### Запуск в браузере
-![Alt-текст](/images/web_prac1.png "С браузера")
+![Alt-текст](/images/web_prac1.jpg "С браузера")
 
 ### Запуск на эмуляторе
-![Alt-текст](/images/pixel6_prac1.png "С эмулятора")
+![Alt-текст](/images/pixel6_prac1.jpg "С эмулятора")
