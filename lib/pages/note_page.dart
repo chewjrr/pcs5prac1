@@ -6,7 +6,6 @@ class NotePage extends StatelessWidget {
 
   const NotePage({super.key, required this.note});
 
-  // Метод для получения цвета фона в зависимости от типа предмета
   Color getBackgroundColor() {
     switch (note.type) {
       case 'Weapon':
@@ -32,44 +31,34 @@ class NotePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Stack для наложения фона, изображения и затемнения
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Контейнер с закругленным фоном в зависимости от типа предмета
                   Container(
                     width: double.infinity,
                     height: 200,
                     decoration: BoxDecoration(
-                      color:
-                          getBackgroundColor(), // Цвет фона в зависимости от типа
-                      borderRadius:
-                          BorderRadius.circular(16.0), // Закругленные углы
+                      color: getBackgroundColor(),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                          16.0), // Закругление изображения
+                      borderRadius: BorderRadius.circular(16.0),
                       child: Image.network(
                         note.imageUrl,
                         width: double.infinity,
                         height: 200,
-                        fit: BoxFit
-                            .contain, // Изображение не будет растягиваться
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
-                  // Полупрозрачный контейнер для затемнения
                   Container(
                     width: double.infinity,
                     height: 200,
                     decoration: BoxDecoration(
-                      color: Colors.black
-                          .withOpacity(0.5), // Затемнение всего контейнера
-                      borderRadius:
-                          BorderRadius.circular(16.0), // Закругленные углы
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                   ),
-                  // Текст поверх затемненного изображения
                   Text(
                     note.title,
                     style: const TextStyle(

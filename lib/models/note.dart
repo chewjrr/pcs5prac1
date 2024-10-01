@@ -9,4 +9,6 @@ class Note {
 
   Note(this.title, this.type, this.text, this.imageUrl, this.cost, this.bonus,
       this.stats);
+
+  get items => null;
 }

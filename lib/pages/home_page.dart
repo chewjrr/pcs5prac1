@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../components/item_note.dart';
 import '../models/note.dart';
+import '../models/cart.dart'; // Импортируем модель Cart
 import '../pages/note_page.dart';
+import '../pages/cart_page.dart'; // Импортируем CartPage
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +15,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   String searchQuery = "";
   String selectedType = "";
+  Cart cart = Cart(); // Создаем одну корзину
 
   final List<Note> notes = [
     Note(
@@ -49,6 +52,12 @@ class HomePageState extends State<HomePage> {
         .toList();
   }
 
+  void addToCart(Note note) {
+    setState(() {
+      cart.items.add(note); // Добавление товара в корзину
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +66,21 @@ class HomePageState extends State<HomePage> {
         title: Image.network(
             "https://deadlocked.wiki/images/thumb/8/8d/Shop_Logo.png/459px-Shop_Logo.png",
             height: 40),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart,
+                color: Colors.black), // Иконка корзины
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CartPage(cart: cart), // Переход на страницу корзины
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -101,22 +125,35 @@ class HomePageState extends State<HomePage> {
               itemCount: filteredNotes().length,
               itemBuilder: (context, index) {
                 final note = filteredNotes()[index];
-                return GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NotePage(note: note),
+                return Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotePage(note: note),
+                        ),
+                      ),
+                      child: ItemNote(
+                        title: note.title,
+                        type: note.type,
+                        text: note.text,
+                        imageUrl: note.imageUrl,
+                        cost: note.cost,
+                        bonus: note.bonus,
+                        stats: note.stats,
+                      ),
                     ),
-                  ),
-                  child: ItemNote(
-                    title: note.title,
-                    type: note.type,
-                    text: note.text,
-                    imageUrl: note.imageUrl,
-                    cost: note.cost,
-                    bonus: note.bonus,
-                    stats: note.stats,
-                  ),
+                    Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.add,
+                            color: Colors.white), // Иконка с плюсом
+                        onPressed: () => addToCart(note), // Добавить в корзину
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
