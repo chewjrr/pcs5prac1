@@ -7,13 +7,16 @@ class NotePage extends StatelessWidget {
   const NotePage({super.key, required this.note});
 
   Color getBackgroundColor() {
+    double opacity = note.activity == 1
+        ? 0.5
+        : 0.75; // Меняем прозрачность, если предмет неактивен
     switch (note.type) {
       case 'Weapon':
-        return const Color.fromARGB(255, 231, 140, 36).withOpacity(0.75);
+        return const Color.fromARGB(255, 231, 140, 36).withOpacity(opacity);
       case 'Vitality':
-        return const Color.fromARGB(255, 61, 138, 63).withOpacity(0.75);
+        return const Color.fromARGB(255, 61, 138, 63).withOpacity(opacity);
       case 'Spirit':
-        return const Color.fromARGB(255, 146, 32, 240).withOpacity(0.75);
+        return const Color.fromARGB(255, 146, 32, 240).withOpacity(opacity);
       default:
         return Colors.black.withOpacity(0.5);
     }

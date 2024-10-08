@@ -6,9 +6,9 @@ class Note {
   final int cost;
   final String bonus;
   final String stats;
+  final int activity;
+  bool isInCart;
 
   Note(this.title, this.type, this.text, this.imageUrl, this.cost, this.bonus,
-      this.stats);
-
-  get items => null;
+      this.stats, this.activity, this.isInCart);
 }
