@@ -4,7 +4,11 @@ import '../models/note.dart';
 class NotePage extends StatelessWidget {
   final Note note;
 
-  const NotePage({super.key, required this.note});
+  const NotePage(
+      {super.key,
+      required this.note,
+      required String title,
+      required String type});
 
   Color getBackgroundColor() {
     double opacity = note.activity == 1

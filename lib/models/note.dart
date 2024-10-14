@@ -8,7 +8,8 @@ class Note {
   final String stats;
   final int activity;
   bool isInCart;
+  bool isFavorite;
 
   Note(this.title, this.type, this.text, this.imageUrl, this.cost, this.bonus,
-      this.stats, this.activity, this.isInCart);
+      this.stats, this.activity, this.isInCart, this.isFavorite);
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:prac3/models/note.dart';
+import 'package:prac3/pages/note_page.dart';
 
 class ItemNote extends StatelessWidget {
   final String title;
@@ -10,6 +12,9 @@ class ItemNote extends StatelessWidget {
   final String stats;
   final int activity;
   final bool isInCart;
+  final bool isFavorite;
+  final VoidCallback onAddToCart; // Добавление в корзину
+  final VoidCallback onToggleFavorite; // Добавление в избранное
 
   const ItemNote({
     super.key,
@@ -22,12 +27,13 @@ class ItemNote extends StatelessWidget {
     required this.stats,
     required this.activity,
     required this.isInCart,
+    required this.isFavorite,
+    required this.onAddToCart, // Параметр добавления в корзину
+    required this.onToggleFavorite, // Параметр добавления в избранное
   });
 
   Color getBackgroundColor() {
-    double opacity = activity == 1
-        ? 0.5
-        : 0.75; // Меняем прозрачность, если предмет неактивен
+    double opacity = activity == 1 ? 0.5 : 0.75;
     switch (type) {
       case 'Weapon':
         return const Color.fromARGB(255, 231, 140, 36).withOpacity(opacity);
@@ -42,55 +48,78 @@ class ItemNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.0),
-          color: getBackgroundColor(),
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-        width: double.infinity,
-        height: 300, // Ограничиваем высоту
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to NotePage on tap
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NotePage(
+              title: title,
+              type: type,
+              note: Note(title, type, text, imageUrl, cost, bonus, stats,
+                  activity, isInCart, isFavorite),
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          height: 400, // Устанавливаем высоту для контейнера
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0),
+            color: getBackgroundColor(), // Применяем цвет фона здесь
+            border: Border.all(color: Colors.white, width: 2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center, // Center the text
-              ),
-              const SizedBox(height: 8),
-              Text(
-                type,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Wrap the image with Flexible or give it fixed height
-              Flexible(
-                child: Image.network(
+                Image.network(
                   imageUrl,
-                  height: 64, // Set fixed height for the image
-                  fit: BoxFit.contain, // Ensure it fits within the container
+                  height: 50, // Ограничиваем высоту
+                  fit: BoxFit.contain,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Cost: $cost Souls",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+                Text(
+                  "Price: $cost Souls",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
                 ),
-              ),
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: Colors.white,
+                      ),
+                      onPressed: onToggleFavorite,
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isInCart
+                            ? Icons.remove_shopping_cart
+                            : Icons.add_shopping_cart,
+                        color: isInCart ? Colors.white : Colors.white,
+                      ),
+                      onPressed: onAddToCart,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

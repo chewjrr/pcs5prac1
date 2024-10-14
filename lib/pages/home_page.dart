@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:prac3/pages/cart_page.dart';
+import 'package:prac3/pages/favorite_page.dart';
 import '../components/item_note.dart';
 import '../models/note.dart';
 import '../models/cart.dart';
-import '../pages/note_page.dart';
-import '../pages/profile_page.dart'; // Импортируем страницу профиля
+//import '../pages/note_page.dart';
+import '../pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,12 +14,28 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
+Color getBackgroundColor(Note note) {
+  double opacity = note.activity == 1 ? 0.5 : 0.75; // Прозрачность
+  switch (note.type) {
+    case 'Weapon':
+      return const Color.fromARGB(255, 231, 140, 36).withOpacity(opacity);
+    case 'Vitality':
+      return const Color.fromARGB(255, 61, 138, 63).withOpacity(opacity);
+    case 'Spirit':
+      return const Color.fromARGB(255, 146, 32, 240).withOpacity(opacity);
+    default:
+      return Colors.black.withOpacity(0.5);
+  }
+}
+
 class HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   String searchQuery = "";
   String selectedType = "";
   Cart cart = Cart(); // Создаем одну корзину
   int _selectedIndex = 0; // Переменная для отслеживания выбранного индекса
+  List<Note> favoriteItems = []; // Переменная для избранных товаров
+
   final List<Note> notes = [
     Note(
       "Basic Magazine",
@@ -29,6 +46,7 @@ class HomePageState extends State<HomePage>
       "+24% Ammo, +15% Weapon Damage",
       "+6% Weapon Damage",
       0,
+      false,
       false,
     ),
     Note(
@@ -41,6 +59,7 @@ class HomePageState extends State<HomePage>
       "+11% Base Health",
       0,
       false,
+      false,
     ),
     Note(
       "Extra Charge",
@@ -51,6 +70,7 @@ class HomePageState extends State<HomePage>
       "+1 Bonus Ability Charges, +10% Cooldown Reduction for Charged Abilities, +6% Weapon Damage",
       "+4 Spirit Power",
       0,
+      false,
       false,
     )
   ];
@@ -77,6 +97,17 @@ class HomePageState extends State<HomePage>
     });
   }
 
+  void toggleFavorite(Note note) {
+    setState(() {
+      note.isFavorite = !note.isFavorite;
+      if (note.isFavorite) {
+        favoriteItems.add(note); // Добавляем в избранное
+      } else {
+        favoriteItems.remove(note); // Удаляем из избранного
+      }
+    });
+  }
+
   // Метод для обновления выбранного индекса и перехода на соответствующую страницу
   void _onItemTapped(int index) {
     setState(() {
@@ -93,7 +124,14 @@ class HomePageState extends State<HomePage>
         currentPage = _buildShopPage(); // Магазин
         break;
       case 1:
-        currentPage = CartPage(cart: cart); // Корзина
+        currentPage = CartPage(
+          cart: cart,
+          onRemoveFromCart: (note) {
+            setState(() {
+              note.isInCart = false; // Меняем иконку обратно на плюсик
+            });
+          },
+        ); // Корзина
         break;
       case 2:
         currentPage = const ProfilePage(); // Профиль
@@ -111,8 +149,8 @@ class HomePageState extends State<HomePage>
             label: 'Shop',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.build),
-            label: 'Build',
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -131,8 +169,54 @@ class HomePageState extends State<HomePage>
       appBar: AppBar(
         backgroundColor: Colors.black.withOpacity(0.5),
         title: Image.network(
-            "https://deadlocked.wiki/images/thumb/8/8d/Shop_Logo.png/459px-Shop_Logo.png",
-            height: 40),
+          "https://deadlocked.wiki/images/thumb/8/8d/Shop_Logo.png/459px-Shop_Logo.png",
+          height: 40,
+        ),
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.favorite),
+                onPressed: () {
+                  // Переход на страницу избранного при нажатии на иконку
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FavoritePage(
+                        favoriteItems: favoriteItems,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              if (favoriteItems.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '${favoriteItems.length}', // Количество избранных товаров
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -182,49 +266,33 @@ class HomePageState extends State<HomePage>
               itemCount: filteredNotes().length,
               itemBuilder: (context, index) {
                 final note = filteredNotes()[index];
-                return Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotePage(note: note),
-                        ),
-                      ),
-                      child: ItemNote(
-                        title: note.title,
-                        type: note.type,
-                        text: note.text,
-                        imageUrl: note.imageUrl,
-                        cost: note.cost,
-                        bonus: note.bonus,
-                        stats: note.stats,
-                        activity: note.activity,
-                        isInCart: note.isInCart,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 10,
-                      right: 5,
-                      child: IconButton(
-                        icon: Icon(
-                          note.isInCart ? Icons.delete : Icons.add,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          if (note.isInCart) {
-                            removeFromCart(note);
-                          } else {
-                            addToCart(note);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
+                return ItemNote(
+                  title: note.title,
+                  type: note.type,
+                  text: note.text,
+                  imageUrl: note.imageUrl,
+                  cost: note.cost,
+                  bonus: note.bonus,
+                  stats: note.stats,
+                  activity: note.activity,
+                  isInCart: note.isInCart,
+                  isFavorite: note.isFavorite,
+                  onAddToCart: () {
+                    setState(() {
+                      if (note.isInCart) {
+                        removeFromCart(note);
+                      } else {
+                        addToCart(note);
+                      }
+                    });
+                  },
+                  onToggleFavorite: () {
+                    toggleFavorite(note);
+                  },
                 );
               },
             ),
-          ),
+          )
         ],
       ),
     );
